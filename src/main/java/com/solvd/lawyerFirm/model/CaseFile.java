@@ -1,13 +1,14 @@
 package com.solvd.lawyerFirm.model;
 
 import com.solvd.lawyerFirm.*;
+import com.solvd.lawyerFirm.enums.CaseStatus;
 
 import java.util.*;
 
 public class CaseFile implements ICaseFile, Identifiable {
 
     private String title;
-    private String status;
+    private CaseStatus status;
     private Client client;
     private Lawyer lawyer;
     private Court court;
@@ -28,7 +29,7 @@ public class CaseFile implements ICaseFile, Identifiable {
         this.judge = judge;
 
         this.title = "Default Case";
-        this.status = "OPEN";
+        this.status = CaseStatus.OPEN;
 
         this.witnesses = new ArrayList<>();
         this.evidences = new HashSet<>();
@@ -47,11 +48,11 @@ public class CaseFile implements ICaseFile, Identifiable {
         this.title = title;
     }
 
-    public String getStatus() {
+    public CaseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CaseStatus status) {
         this.status = status;
     }
 
@@ -69,7 +70,7 @@ public class CaseFile implements ICaseFile, Identifiable {
         if (evidence == null) {
             throw new IllegalArgumentException("Evidence cannot be null");
         }
-        if (status.equals("CLOSED")) {
+        if (status == CaseStatus.CLOSED) {
             throw new InvalidCaseStateException("Cannot add evidence to a closed case");
         }
         if (evidences.contains(evidence)) {
@@ -99,13 +100,13 @@ public class CaseFile implements ICaseFile, Identifiable {
     @Override
     public void updateStatus() {
         if (!hearings.isEmpty()) {
-            setStatus("IN_PROGRESS");
+            status = CaseStatus.IN_PROGRESS;
         }
         if (evidences.size() > 5) {
-            setStatus("UNDER_REVIEW");
+            status = CaseStatus.UNDER_REVIEW;
         }
         if (hearings.isEmpty() && evidences.isEmpty()) {
-            setStatus("OPEN");
+            status = CaseStatus.OPEN;
         }
     }
 
@@ -113,7 +114,7 @@ public class CaseFile implements ICaseFile, Identifiable {
     public String toString() {
         return "CaseFile{" +
                 "\n title='" + title + '\'' +
-                ",\n status='" + status + '\'' +
+                ",\n status=" + status +
                 ",\n client=" + client +
                 ",\n lawyer=" + lawyer +
                 ",\n court=" + court +
