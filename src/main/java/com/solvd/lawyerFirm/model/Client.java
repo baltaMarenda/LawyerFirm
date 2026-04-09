@@ -1,22 +1,23 @@
 package com.solvd.lawyerFirm.model;
 
 import java.util.Objects;
+import com.solvd.lawyerFirm.enums.CrimeType;
 
 public class Client extends Person {
 
-    private String problem;
+    private CrimeType crimeType;
 
-    public Client(String name, String problem, int age) {
+    public Client(String name, CrimeType crimeType, int age) {
         super(name, age);
-        this.problem = problem;
+        this.crimeType = crimeType;
     }
 
-    public String getProblem() {
-        return problem;
+    public CrimeType getCrimeType() {
+        return crimeType;
     }
 
-    public void setProblem(String problem) {
-        this.problem = problem;
+    public void setCrimeType(CrimeType crimeType) {
+        this.crimeType = crimeType;
     }
 
     @Override
@@ -33,7 +34,7 @@ public class Client extends Person {
     public String toString() {
         return "Client{" +
                 "name='" + getName() + '\'' +
-                ", problem='" + problem + '\'' +
+                ", crimeType=" + crimeType +
                 '}';
     }
 
@@ -43,11 +44,11 @@ public class Client extends Person {
         if (!(o instanceof Client)) return false;
         Client client = (Client) o;
         return Objects.equals(getName(), client.getName()) &&
-                Objects.equals(problem, client.problem);
+                crimeType == client.crimeType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), problem);
+        return Objects.hash(getName(), crimeType);
     }
 }
