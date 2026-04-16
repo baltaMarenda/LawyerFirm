@@ -1,5 +1,11 @@
 package com.solvd.lawyerFirm;
 
+import com.solvd.lawyerFirm.enums.CaseStatus;
+import com.solvd.lawyerFirm.enums.CrimeType;
+import com.solvd.lawyerFirm.enums.DocumentType;
+import com.solvd.lawyerFirm.functional.Action;
+import com.solvd.lawyerFirm.functional.Filter;
+import com.solvd.lawyerFirm.functional.Transformer;
 import com.solvd.lawyerFirm.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +22,8 @@ public class Main {
         logger.info("=== SYSTEM START ===");
 
         try {
-            Client client = new Client("Juan Perez", "Robbery", 30);
+            // ✅ ENUMS
+            Client client = new Client("Juan Perez", CrimeType.ROBBERY, 30);
             Lawyer lawyer = new Lawyer("Dr. Gomez", "Criminal Law", 45);
             Judge judge = new Judge("Judge Ramirez", 60);
 
@@ -32,9 +39,9 @@ public class Main {
             people.add(witness1);
             people.add(witness2);
 
-            for (Person p : people) {
-                logger.info(p.getName() + " is a " + p.getRole());
-            }
+            people.forEach(p ->
+                    logger.info(p.getName() + " is a " + p.getRole())
+            );
 
             Court court = new Court("Supreme Court");
             CaseFile caseFile = new CaseFile(client, lawyer, court, judge);
@@ -55,8 +62,9 @@ public class Main {
                 logger.error("Expected error: " + e.getMessage());
             }
 
-            Document d1 = new Document("Police Report");
-            Document d2 = new Document("Contract");
+            // ✅ DOCUMENT CON ENUM
+            Document d1 = new Document("Police Report", DocumentType.REPORT);
+            Document d2 = new Document("Contract", DocumentType.CONTRACT);
 
             caseFile.addDocument(d1);
             caseFile.addDocument(d2);
@@ -76,10 +84,11 @@ public class Main {
 
             logger.info("Witnesses added");
 
-            Client client2 = new Client("Juan Perez", "Robbery", 30);
+            Client client2 = new Client("Juan Perez", CrimeType.ROBBERY, 30);
             logger.info("Clients equal: " + client.equals(client2));
 
-            caseFile.setStatus("CLOSED");
+            // ✅ ENUM STATUS
+            caseFile.setStatus(CaseStatus.CLOSED);
             logger.warn("Case closed");
 
             try {
@@ -89,12 +98,10 @@ public class Main {
             }
 
             try {
-                Client invalid = new Client("", "Fraud", -1);
+                Client invalid = new Client("", CrimeType.FRAUD, -1);
             } catch (InvalidPersonException e) {
                 logger.error("Expected error: " + e.getMessage());
             }
-
-
 
             Repository<Evidence> evidenceRepository = new Repository<>();
             evidenceRepository.add(e1);
@@ -102,16 +109,38 @@ public class Main {
 
             logger.info("Repository size: " + evidenceRepository.getAll().size());
 
-
+            // ✅ PAIR CORREGIDO (getFirst / getSecond)
             Pair<String, Client> caseOwner = new Pair<>("CaseOwner", client);
             logger.info("Pair -> " + caseOwner.getFirst() + ": " + caseOwner.getSecond().getName());
-
 
             Validator<Client> clientValidator = new Validator<>();
             boolean isValid = clientValidator.isValid(client);
             logger.info("Client valid: " + isValid);
 
+            // =========================================
+            // FUNCTIONAL INTERFACES + LAMBDAS
+            // =========================================
 
+            Filter<Evidence> longEvidence =
+                    e -> e.getDescription().length() > 10;
+
+            Transformer<Evidence, String> toUpper =
+                    e -> e.getDescription().toUpperCase();
+
+            Action<String> print =
+                    str -> logger.info(str);
+
+            logger.info("=== FILTERED & TRANSFORMED EVIDENCE ===");
+
+            caseFile.getEvidences()
+                    .stream()
+                    .filter(longEvidence::apply)
+                    .map(toUpper::transform)
+                    .forEach(print::execute);
+
+            // =========================================
+            // SUMMARY
+            // =========================================
 
             logger.info("=== SUMMARY ===");
             logger.info("Status: " + caseFile.getStatus());
@@ -121,19 +150,17 @@ public class Main {
             logger.info("Witness count: " + caseFile.getWitnesses().size());
 
             logger.info("=== EVIDENCE LIST ===");
-            for (Evidence ev : caseFile.getEvidences()) {
-                logger.info(ev.getDescription());
-            }
+            caseFile.getEvidences()
+                    .forEach(ev -> logger.info(ev.getDescription()));
 
             logger.info("=== DOCUMENT LIST ===");
-            for (Document doc : caseFile.getDocuments().values()) {
-                logger.info(doc.getTitle());
-            }
+            caseFile.getDocuments()
+                    .values()
+                    .forEach(doc -> logger.info(doc.getTitle()));
 
             logger.info("=== HEARING LIST ===");
-            for (Hearing h : caseFile.getHearings()) {
-                logger.info(h.getDate());
-            }
+            caseFile.getHearings()
+                    .forEach(h -> logger.info(h.getDate()));
 
         } catch (Exception e) {
             logger.fatal("Unexpected error: " + e.getMessage());
